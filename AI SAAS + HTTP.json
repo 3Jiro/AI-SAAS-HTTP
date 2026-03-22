@@ -1,0 +1,337 @@
+{
+  "name": "AI SAAS + HTTP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "63085aec-3a9c-4212-9c49-b39f6829ef48",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1bbb520d-0682-4990-8e6d-cd2e43c9c872",
+      "name": "Webhook",
+      "webhookId": "63085aec-3a9c-4212-9c49-b39f6829ef48"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.websiteUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "244b8712-0df6-48b8-800a-794a5956a887",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "data",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3895b986-8937-4ac2-a33f-85c9be56f1c4",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You're an expert social media content writer. Your goal is to create a captivating caption for the platform: {{ $('Webhook').item.json.body.platform }}. Your goal is to have people engage with the post through liking, commenting and sharing.\n",
+              "role": "model"
+            },
+            {
+              "content": "=Industry: {{ $('Webhook').item.json.body.industry }}\nCompany Name: {{ $('Webhook').item.json.body.companyName }}\nWebsite: {{ $('Webhook').item.json.body.websiteUrl }}\nPlatform: {{ $('Webhook').item.json.body.platform }}\nPost type: {{ $('Webhook').item.json.body.postType }}\nWebsite content: {{ $json.data }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "3523b6a1-fd33-427a-9f7c-753acedacc76",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IYTeTOkVCsAMAg5v",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You're an expert social media manager who is fantastic at creating prompts for generating AI images. You're tasked with creating a prompt for an AI social media image.",
+              "role": "model"
+            },
+            {
+              "content": "=Industry: {{ $('Webhook').item.json.body.industry }}\nCompany Name: {{ $('Webhook').item.json.body.companyName }}\nWebsite: {{ $('Webhook').item.json.body.websiteUrl }}\nPlatform: {{ $('Webhook').item.json.body.platform }}\nPost type: {{ $('Webhook').item.json.body.postType }}\nSocial media caption: {{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        0
+      ],
+      "id": "b7b69a93-aea3-42f5-b47f-7d6c4be8b47b",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IYTeTOkVCsAMAg5v",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image (Nano Banana)"
+        },
+        "prompt": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        0
+      ],
+      "id": "582db995-4a1b-4ff3-9094-7c014a387c26",
+      "name": "Generate an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "IYTeTOkVCsAMAg5v",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"post\": \"\",\n  \"image\": \"\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1488,
+        0
+      ],
+      "id": "956ff219-656d-4e12-bd17-5b58867ae340",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "marilu-pervious-ivette.ngrok-free.dev",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+            "content-length": "180",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-NG,en-US;q=0.9,en;q=0.8,eo;q=0.7,sl;q=0.6,ru;q=0.5,de;q=0.4",
+            "content-type": "application/json",
+            "origin": "https://id-preview--b22c5156-279b-4189-b527-33290eff770e.lovable.app",
+            "priority": "u=1, i",
+            "referer": "https://id-preview--b22c5156-279b-4189-b527-33290eff770e.lovable.app/",
+            "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "102.90.124.12",
+            "x-forwarded-host": "marilu-pervious-ivette.ngrok-free.dev",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "industry": "AI automation",
+            "companyName": "Automatable",
+            "websiteUrl": "https://fast.com",
+            "platform": "LinkedIn",
+            "postType": "Generic",
+            "postSpecifications": "",
+            "genericCategory": "News"
+          },
+          "webhookUrl": "https://marilu-pervious-ivette.ngrok-free.dev/webhook-test/63085aec-3a9c-4212-9c49-b39f6829ef48",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Message a model": [
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "Here's a LinkedIn caption designed to drive engagement for Automatable, while creatively incorporating the `fast.com` link as requested, despite the industry difference:\n\n---\n\n**Hook:** Ever wish you could assess your business's efficiency with the same speed and simplicity you check your internet connection?\n\n**Body:** Think about how `fast.com` gives you immediate, critical insights into your network performance. No jargon, just clear data.\n\nAt **Automatable**, we apply that philosophy to your entire business. We leverage cutting-edge AI to swiftly identify bottlenecks, optimize workflows, and deliver the real-time insights you need to make rapid, informed decisions.\n\nImagine achieving unparalleled operational speed and clarity, freeing your teams to focus on innovation, not administrative friction.\n\n**Call to Action:** What's one business process you'd love to see run at \"light speed\" thanks to AI automation? Share your thoughts below! 👇\n\n#AIAutomation #BusinessEfficiency #DigitalTransformation #Innovation #FutureOfWork #Automatable\n\n**Reference Link:** Curious about speed and instant insights? See a prime example here: [https://fast.com]"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Message a model1": [
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "Here's an AI image prompt designed for your LinkedIn post, focusing on the core themes of speed, clarity, AI automation, and business efficiency, while subtly echoing the `fast.com` analogy:\n\n---\n\n**Prompt for AI Image Generator:**\n\n\"A sleek, professional, and futuristic digital interface or holographic display at the center of a modern, bright office environment. The main focal point is a prominent, minimalist **'speedometer' or digital gauge, visually reminiscent of a network speed test, but clearly indicating an incredibly high business metric like 'Operational Velocity,' 'Workflow Throughput,' or 'Efficiency Score' (e.g., displaying '987X Faster' or '99.9% Optimization')**.\n\nAround this central gauge, dynamic, glowing streams of data and interconnected abstract neural network patterns pulsate in vibrant blues, purples, and electric greens, symbolizing cutting-edge AI automation and seamlessly optimized workflows. Subtle, integrated infographics in the background show clear upward trends, increased productivity, and a smooth, bottleneck-free flow of information.\n\nIn the mid-ground, a diverse team of professional individuals (e.g., a business analyst, a manager, a data scientist) observe the display with expressions of clarity, insight, and satisfaction, conveying empowerment and human-AI collaboration. The overall aesthetic is high-tech, clean, and optimistic, emphasizing speed, simplicity, and powerful business transformation.\n\n**Style:** Corporate, professional, high-tech, futuristic, digital art, photorealistic with a polished finish.\n**Lighting:** Bright, clean, and professional office lighting, with soft glows emanating from the digital elements.\n**Color palette:** Dominant blues, purples, and electric greens against a backdrop of clean whites, grays, and metallics.\n**Composition:** Mid-shot, focusing on the dynamic interface and capturing the engaged expressions of 2-3 team members, suggesting leadership and innovation. Highly detailed, 8k.\""
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cac6cd67-2930-4c8f-bf5d-db8f5670f42c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54b06315817fd07df4927ca7349fea37606eb75294a247e231fd9d13aa12f311"
+  },
+  "id": "fvSmc1gVGburtPJ3",
+  "tags": []
+}
